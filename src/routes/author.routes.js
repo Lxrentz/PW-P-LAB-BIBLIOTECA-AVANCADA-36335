@@ -1,14 +1,16 @@
-const express = require("express");
-const router = express.Router();
-const {
- getAllAuthors,
- getAuthorById,
- createAuthor,
- updateAuthor,
- deleteAuthor,
- getBooksByAuthorId,
- getTopAuthors,
-} = require("../controllers/author.controller");
+import { Router } from "express";
+import {
+  getAllAuthors,
+  getAuthorById,
+  createAuthor,
+  updateAuthor,
+  deleteAuthor,
+  getBooksByAuthorId,
+  getTopAuthors,
+} from "../controllers/author.controller.js"; 
+
+const router = Router();
+
 router.get("/top", getTopAuthors);
 router.get("/", getAllAuthors);
 router.get("/:id/books", getBooksByAuthorId);
@@ -16,4 +18,5 @@ router.get("/:id", getAuthorById);
 router.post("/", createAuthor);
 router.put("/:id", updateAuthor);
 router.delete("/:id", deleteAuthor);
-module.exports = router;
+
+export default router;

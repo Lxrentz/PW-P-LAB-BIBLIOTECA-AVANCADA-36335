@@ -1,35 +1,48 @@
-require("dotenv").config();
+import express from 'express'
+import cors from 'cors'
+import { configDotenv } from 'dotenv'
+import morgan from 'morgan'
+import authorsRouter from './routes/author.routes.js'
+import booksRouter from './routes/book.routes.js'
+import authRouter from './routes/authRoutes.js'
+import prisma from './prisma/prismaClient.js'
+import errorMiddleware from './middlewares/error.middleware.js'
 
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const authorRoutes = require("./routes/author.routes");
-const bookRoutes = require("./routes/book.routes");
-const statsRoutes = require("./routes/stats.routes");
-const errorMiddleware = require("./middlewares/error.middleware");
+const app = express()
 
-const app = express();
+configDotenv()
+app.use(express.json())
+app.use(cors())
+app.use(morgan("dev"))
 
-app.use(cors());
-app.use(express.json());
-app.use(morgan("dev"));
+app.use("/authors", authorsRouter)
+app.use("/books", booksRouter)
+app.use("/auth", authRouter)
 
-app.use("/authors", authorRoutes);
-app.use("/books", bookRoutes);
-app.use("/stats", statsRoutes);
+app.use("/stats", async (req, res) => {
 
-app.use((req, res) => {
- res.status(404).json({ message: "Rota não encontrada" });
-});
+    const totalBooks = await prisma.book.count();
+    const totalAuthors = await prisma.author.count();
+    const availableBooks = await prisma.book.count({
+        where: { available: true }
+    });
+    const borrowedBooks = await prisma.book.count({
+        where: { available: false }
+    });
 
-app.use(errorMiddleware);
+    let data = {
+        totalBooks,
+        totalAuthors,
+        availableBooks,
+        borrowedBooks
+    }
 
-const PORT = process.env.SERVER_PORT || 3000;
+    return res.status(200).json({ message: "Status do banco de dados pegos com sucesso: ", data})
+})
 
-if (process.env.NODE_ENV !== "production") {
- app.listen(PORT, () => {
- console.log(`Servidor a correr em http://localhost:${PORT}`);
- });
-}
+app.use(errorMiddleware)
 
-module.exports = app;
+const PORT = process.env.SERVER_PORT || 3000
+app.listen(PORT, () => {
+    console.log(`Servidor escutando na porta ${PORT}`)
+})

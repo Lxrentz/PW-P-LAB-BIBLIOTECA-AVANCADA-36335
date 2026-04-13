@@ -1,13 +1,14 @@
-const prisma = require("../prisma/prismaClient");
+import prisma from "../prisma/prismaClient.js";
 
-const getAllAuthors = async () => {
+export const getAllAuthors = async () => {
     return prisma.author.findMany({
         orderBy: {
             name: "asc",
         },
     });
 };
-const getAuthorById = async (id) => {
+
+export const getAuthorById = async (id) => {
     const author = await prisma.author.findUnique({
         where: { id },
         include: {
@@ -24,7 +25,7 @@ const getAuthorById = async (id) => {
     return author;
 };
 
-const createAuthor = async (data) => {
+export const createAuthor = async (data) => {
     const { name, nationality, birthYear } = data;
 
     if (!name) {
@@ -42,7 +43,7 @@ const createAuthor = async (data) => {
     });
 };
 
-const updateAuthor = async (id, data) => {
+export const updateAuthor = async (id, data) => {
     const { name, nationality, birthYear } = data;
 
     const existingAuthor = await prisma.author.findUnique({
@@ -71,7 +72,7 @@ const updateAuthor = async (id, data) => {
     });
 };
 
-const deleteAuthor = async (id) => {
+export const deleteAuthor = async (id) => {
     const existingAuthor = await prisma.author.findUnique({
         where: { id },
         include: {
@@ -96,7 +97,7 @@ const deleteAuthor = async (id) => {
     });
 };
 
-const getBooksByAuthorId = async (id) => {
+export const getBooksByAuthorId = async (id) => {
     const author = await prisma.author.findUnique({
         where: { id },
     });
@@ -115,7 +116,7 @@ const getBooksByAuthorId = async (id) => {
     });
 };
 
-const getTopAuthors = async () => {
+export const getTopAuthors = async () => {
     const authors = await prisma.author.findMany({
         include: {
             books: true,
@@ -129,14 +130,4 @@ const getTopAuthors = async () => {
             totalBooks: author.books.length,
         }))
         .sort((a, b) => b.totalBooks - a.totalBooks);
-};
-
-module.exports = {
-    getAllAuthors,
-    getAuthorById,
-    createAuthor,
-    updateAuthor,
-    deleteAuthor,
-    getBooksByAuthorId,
-    getTopAuthors,
 };

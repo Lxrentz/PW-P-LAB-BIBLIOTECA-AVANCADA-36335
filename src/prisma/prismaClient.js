@@ -1,12 +1,18 @@
-require("dotenv").config();
+import { config } from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
-const { PrismaClient } = require("@prisma/client");
-const { PrismaPg } = require("@prisma/adapter-pg");
+config();
 
-const adapter = new PrismaPg({
- connectionString: process.env.DATABASE_URL,
+const { Pool } = pg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
+
+const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({ adapter });
 
-module.exports = prisma;
+export default prisma;
